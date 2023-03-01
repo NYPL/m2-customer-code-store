@@ -23,19 +23,32 @@ class RedisClient:
     def get_size(self):
         return self.client.dbsize()
     
-    def get_customer_code(self, key):
+# Expects a list of strings that look like this: m2-barcode-store-by-barcode-{barcode}
+    def get_customer_codes(self, barcodes):
         resp = {}
-        code = self.client.get(key)
-        if code == None or key == None:
+        barcodes_with_customer_codes = []
+        customer_codes = self.client.mget(barcodes)
+        failed_barcodes = []
+        barcodes_length = len(barcodes) if barcodes != None else 0
+        if customer_codes == None or barcodes_length == 0:
             resp['status'] = 400 
-            if key == None:
+            if barcodes == None or barcodes_length == 0:
                 resp['message'] = 'No barcode supplied'
             else:
-                resp['message'] = 'Customer code not found for barcode: ' + key 
-        else:
+                resp['message'] = 'Customer codes not found for barcodes: ' + ', '.join(barcodes) 
+        else: 
+            for i in range(barcodes_length):
+                if customer_codes[i] != None:
+                    barcodes_with_customer_codes.append({
+                        "barcode": barcodes[i].replace("m2-barcode-store-by-barcode-", ""), 
+                        "m2CustomerCode":customer_codes[i]})
+                else:
+                    failed_barcodes.append(barcodes[i])
+
             resp['status'] = 200
-            resp['barcode'] = key 
-            resp['m2CustomerCode'] = code
+            resp['data'] = barcodes_with_customer_codes
+            if len(failed_barcodes) > 0:
+                self.logger.debug('Barcodes {} returned no customer codes'.format(', '.join(failed_barcodes)))
         return resp
 
     def _danger_delete(self, *, pattern='', key=''):
@@ -48,3 +61,8 @@ class RedisClient:
 class RedisClientError(Exception):
     def __init__(self, message = None):
         self.message = message
+
+# r = RedisClient('rescat-romcom-redis-qa.frh6pg.0001.use1.cache.amazonaws.com')
+# print(r.get_customer_codes(["m2-barcode-store-by-barcode-33433101372807",
+#                             'yo mama',
+#     "m2-barcode-store-by-barcode-33433132050471",]))
