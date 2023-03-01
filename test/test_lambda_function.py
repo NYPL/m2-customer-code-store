@@ -1,6 +1,5 @@
 import pytest
 import lambda_function
-import json
 
 class TestLambdaFunction:
     @pytest.fixture
