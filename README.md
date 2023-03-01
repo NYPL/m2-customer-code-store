@@ -19,6 +19,8 @@ The app will return a 400 if the barcodes param is missing or invalid.
 The app should respond with a structure resembling this in general:
 
 Successful response:
+
+```json
 {
 "statusCode": 200,
 "body": {
@@ -27,12 +29,13 @@ Successful response:
 {
 “barcode”: “1234”,
 “m2CustomerCode”: “NX”
-},
-…
+}
 ]
 }}
+```
 
 Failure response (returned with no response from elasticache):
+```json
 {
 "statusCode": 400,
 "body": {
@@ -40,7 +43,7 @@ Failure response (returned with no response from elasticache):
 "message": "Failure message"
 }
 }
-
+```
 ## Loading data to the store
 
 ### Creating CSV to upload

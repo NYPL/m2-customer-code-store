@@ -29,5 +29,8 @@ def handler(event, context):
         "statusCode": response.status,
         "body": json.dumps({
             response
-        })
+        }),
+        "headers": {
+      "Content-type": "application/json"
+    }
     }
