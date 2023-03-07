@@ -8,6 +8,7 @@ from redis_client import RedisClient, RedisClientError
 
 logger = create_log('lambda_function')
 
+
 def handler(event, context):
     logger.info('Connecting to redis')
     kms_client = KmsClient()
@@ -22,15 +23,13 @@ def handler(event, context):
         barcodes = event['queryStringParameters']['barcodes'].split(',')
         barcodes_with_prefix = ['m2-barcode-store-by-barcode-' + barcode for barcode in barcodes]
         response = redis_client.get_customer_codes(barcodes_with_prefix)
-        return response
-    except Exception as e:
-        logger.error('error getting barcode ', e)
+        print(response)
+    except Exception   as e:
+        logger.error('error getting barcodes ', e)
     return {
-        "statusCode": response.status,
-        "body": json.dumps({
-            response
-        }),
+        "statusCode": response["status"],
+        "body": json.dumps(response),
         "headers": {
-      "Content-type": "application/json"
-    }
+        "Content-type": "application/json"
+        }
     }

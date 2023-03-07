@@ -1,17 +1,17 @@
 import pytest
-import lambda_function
+import main
 
 class TestLambdaFunction:
     @pytest.fixture
     def mock_redis_client(self, mocker):
         client = mocker.MagicMock()
-        mocker.patch('lambda_function.RedisClient', return_value = client)
+        mocker.patch('main.RedisClient', return_value = client)
         return client
     
     @pytest.fixture
     def mock_kms_client(self, mocker):
-        client = mocker.MagicMock()
-        mocker.patch('lambda_function.KmsClient', return_value = client)
+        client =  mocker.MagicMock()
+        mocker.patch('main.KmsClient', return_value = client)
         client.decrypt.return_value = 'whatever'
         return client
 
@@ -22,6 +22,6 @@ class TestLambdaFunction:
                     }
                 }
         mock_redis_client.get_customer_codes.return_value = {"data": [], "status": [] }
-        lambda_function.handler(event, {})
+        main.handler(event, {})
         mock_redis_client.get_customer_codes.assert_called_with(['m2-barcode-store-by-barcode-33433101372807', 'm2-barcode-store-by-barcode-33433132050471', 'm2-barcode-store-by-barcode-33433131096251'])
     
