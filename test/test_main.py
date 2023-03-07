@@ -1,4 +1,5 @@
 import pytest
+import os
 import main
 
 class TestLambdaFunction:
@@ -8,14 +9,8 @@ class TestLambdaFunction:
         mocker.patch('main.RedisClient', return_value = client)
         return client
     
-    @pytest.fixture
-    def mock_kms_client(self, mocker):
-        client =  mocker.MagicMock()
-        mocker.patch('main.KmsClient', return_value = client)
-        client.decrypt.return_value = 'whatever'
-        return client
-
-    def test_lambda_handler_string_parse(self, mock_redis_client, mock_kms_client, mocker):
+    def test_lambda_handler_string_parse(self, mock_redis_client, mocker):
+        os.environ["ENVIRONMENT"] = 'test'
         event = {
                     "queryStringParameters": {
                         "barcodes": "33433101372807,33433132050471,33433131096251"

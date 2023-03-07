@@ -1,8 +1,7 @@
+import os
 import json
-from nypl_py_utils import KmsClient
 from nypl_py_utils.functions.log_helper import create_log
-
-from dotenv import dotenv_values
+from nypl_py_utils.functions.config_helper import load_env_file
 
 from redis_client import RedisClient, RedisClientError
 
@@ -11,13 +10,11 @@ logger = create_log('lambda_function')
 
 def handler(event, context):
     logger.info('Connecting to redis')
-    kms_client = KmsClient()
     try:
-        config = dotenv_values('config/local.env')
-        endpoint = kms_client.decrypt(config['REDIS_ENDPOINT'])
+        load_env_file(os.environ['ENVIRONMENT'], 'config/{}.yaml')
+        endpoint = os.environ['REDIS_ENDPOINT']
         redis_client = RedisClient(endpoint)
     except RedisClientError as e:
-        kms_client.close()
         logger.error('error connecting to redis', e)
     try:
         barcodes = event['queryStringParameters']['barcodes'].split(',')
