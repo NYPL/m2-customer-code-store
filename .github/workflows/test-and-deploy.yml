@@ -24,8 +24,8 @@ jobs:
       steps:
         - name: Package app
           run: |
-            chmod +x ./package.sh
-            ./package.sh
+            chmod +x package.sh
+            package.sh
           shell: bash
         - uses: hashicorp/setup-terraform@v2
         - name: Deploy app to QA
