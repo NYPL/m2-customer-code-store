@@ -22,6 +22,7 @@ jobs:
       needs: test
       if: github.ref == 'refs/heads/qa'
       steps:
+        - uses: actions/checkout@v3
         - name: Package app
           run: bash provisioning/package.sh
         - uses: hashicorp/setup-terraform@v2
