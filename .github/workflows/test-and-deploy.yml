@@ -23,7 +23,10 @@ jobs:
       if: github.ref == 'refs/heads/qa'
       steps:
         - name: Package app
-          run: provisioning/package.sh
+          run: |
+            chmod +x ./provisioning/package.sh
+            ./provisioning/package.sh
+          shell: bash
         - uses: hashicorp/setup-terraform@v2
         - name: Deploy app to QA
           run: |
