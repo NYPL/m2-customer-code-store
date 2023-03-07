@@ -6,10 +6,6 @@ This app contains:
 2. Lightweight API for getting customer codes
 3. A script for uploading customer codes to the Redis Elasticache
 
-## Config
-
-all this app requires is the kms-encrypted Redis endpoint.
-
 ## API
 
 The interface for this API looks like this:
@@ -24,13 +20,13 @@ Successful response:
 {
 "statusCode": 200,
 "body": {
-"status": 200,
-“data”: [
-{
-“barcode”: “1234”,
-“m2CustomerCode”: “NX”
-}
-]
+  "status": 200,
+  “data”: [
+    {
+    “barcode”: “1234”,
+    “m2CustomerCode”: “NX”
+    }
+  ]
 }}
 ```
 
@@ -63,7 +59,14 @@ Accession date
 Customer code
 Delete date
 
-## Script to upload
+## Upload script
 
 `python write_csv_to_redis {csvfilename} {batchsize}`
 Batch size defaults to 100. The initial load of >2,000,000 records, using a batch size of 10,000, took around 30 seconds.
+
+## Troubleshooting
+Troubleshooting psycopg "ImportError: no pq wrapper available."
+In OSX, if you have a /usr/local/opt/libpq/lib and xcode installed, but get above error when running the app locally, you may need to install the psycopg this way:
+
+pip uninstall psycopg
+pip install "psycopg[c]"
