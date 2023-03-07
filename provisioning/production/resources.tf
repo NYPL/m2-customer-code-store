@@ -6,7 +6,7 @@ terraform {
   # Use s3 to store terraform state
   backend "s3" {
     bucket  = "nypl-travis-builds-production"
-    key     = "holdshelf-poller-terraform-state"
+    key     = "m2-customer-code-poller-terraform-state"
     region  = "us-east-1"
   }
 }
