@@ -36,5 +36,5 @@ jobs:
       - uses: hashicorp/setup-terraform@v2
       - name: Deploy app to QA
         run: |
-          terraform -chdir=provisioning/qa init -input=false -reconfigure
+          terraform -chdir=provisioning/qa init -input=false
           terraform -chdir=provisioning/qa apply -auto-approve -input=false
