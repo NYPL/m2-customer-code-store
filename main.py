@@ -20,12 +20,13 @@ def handler(event, context):
         barcodes = event['queryStringParameters']['barcodes'].split(',')
         barcodes_with_prefix = ['m2-barcode-store-by-barcode-' + barcode for barcode in barcodes]
         response = redis_client.get_customer_codes(barcodes_with_prefix)
-    except Exception   as e:
+    except Exception as e:
         logger.error('error in RedisClient :{}'.format(e))
-    return {
-            "statusCode": response['status'],
-            "body": json.dumps(response),
-            "headers": {
-            "Content-type": "application/json"
-            }
-    }
+    else:
+        return {
+                "statusCode": response['status'],
+                "body": json.dumps(response),
+                "headers": {
+                "Content-type": "application/json"
+                }
+        }
