@@ -10,7 +10,6 @@ logger = create_log('lambda_function')
 
 def handler(event, context):
     logger.info('Connecting to redis')
-    response = {}
     try:
         load_env_file(os.environ['ENVIRONMENT'], 'config/{}.yaml')
         endpoint = os.environ['REDIS_ENDPOINT']
@@ -22,7 +21,7 @@ def handler(event, context):
         barcodes_with_prefix = ['m2-barcode-store-by-barcode-' + barcode for barcode in barcodes]
         response = redis_client.get_customer_codes(barcodes_with_prefix)
     except Exception   as e:
-        logger.error('error getting barcodes :{}'.format(e))
+        logger.error('error in RedisClient :{}'.format(e))
     return {
             "statusCode": response['status'],
             "body": json.dumps(response),
