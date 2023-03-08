@@ -24,7 +24,7 @@ def handler(event, context):
     except Exception   as e:
         logger.error('error getting barcodes :{}'.format(e))
     return {
-            "statusCode": response["status"],
+            "statusCode": response['status'],
             "body": json.dumps(response),
             "headers": {
             "Content-type": "application/json"
