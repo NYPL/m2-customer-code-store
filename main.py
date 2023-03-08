@@ -15,14 +15,14 @@ def handler(event, context):
         endpoint = os.environ['REDIS_ENDPOINT']
         redis_client = RedisClient(endpoint)
     except RedisClientError as e:
-        logger.error('error connecting to redis', e)
+        logger.error('error connecting to redis: {}'.format(e))
     try:
         barcodes = event['queryStringParameters']['barcodes'].split(',')
         barcodes_with_prefix = ['m2-barcode-store-by-barcode-' + barcode for barcode in barcodes]
         response = redis_client.get_customer_codes(barcodes_with_prefix)
         print(response)
     except Exception   as e:
-        logger.error('error getting barcodes ', e)
+        logger.error('error getting barcodes :{}'.format(e))
     return {
         "statusCode": response["status"],
         "body": json.dumps(response),
