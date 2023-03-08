@@ -53,6 +53,7 @@ resource "aws_lambda_function" "lambda_instance" {
   environment {
     variables = {
       ENVIRONMENT = var.environment
+      TF_LOG = "DEBUG"
     }
   }
 }
