@@ -30,7 +30,8 @@ class RedisClient:
         customer_codes = self.client.mget(barcodes)
         failed_barcodes = []
         barcodes_length = len(barcodes) if barcodes != None else 0
-        if customer_codes == None or barcodes_length == 0:
+        no_customer_codes = all(code == None for code in customer_codes)
+        if no_customer_codes or barcodes_length == 0:
             resp['status'] = 400 
             if barcodes == None or barcodes_length == 0:
                 resp['message'] = 'No barcode supplied'
