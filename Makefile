@@ -7,4 +7,4 @@ help:
 	@echo "    run associated test suite with pytest"
 
 test: 
-				pytest
+				ENVIRONMENT=test pytest
