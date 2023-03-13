@@ -8,7 +8,11 @@ class TestLambdaFunction:
         client = mocker.MagicMock()
         mocker.patch('main.RedisClient', return_value = client)
         return client
-    
+    @pytest.fixture
+    def mock_py_utils(self, mocker):
+        utils = mocker.MagicMock()
+        mocker.patch('main.nypl_py_utils.functions.config_helper', return_value = utils)
+        return utils
     def test_lambda_handler_string_parse(self, mock_redis_client, mocker):
         event = {
                     "queryStringParameters": {
