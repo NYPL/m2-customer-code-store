@@ -29,5 +29,3 @@ def handler(event, context):
         }
     except Exception as e:
         logger.error('error getting barcodes :{}'.format(e))
-
-print(handler({"queryStringParameters":{"barcodes":"123"}}, {}))

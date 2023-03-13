@@ -62,8 +62,3 @@ class RedisClient:
 class RedisClientError(Exception):
     def __init__(self, message = None):
         self.message = message
-
-# r = RedisClient('rescat-romcom-redis-qa.frh6pg.0001.use1.cache.amazonaws.com')
-# print(r.get_customer_codes(["m2-barcode-store-by-barcode-33433101372807",
-#                             'yo mama',
-#     "m2-barcode-store-by-barcode-33433132050471",]))
