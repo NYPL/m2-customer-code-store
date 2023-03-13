@@ -16,7 +16,7 @@ jobs:
           pip install -r requirements.txt
       - name: Run test suite
         run: |
-          make test
+          ENVIRONMENT=qa make test
   deploy-qa:
     permissions:
       id-token: write
