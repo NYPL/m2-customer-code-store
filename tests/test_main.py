@@ -20,7 +20,6 @@ class TestLambdaFunction:
                         "barcodes": "33433101372807,33433132050471,33433131096251"
                     }
                 }
-        mock_py_utils.create_logger
         mock_redis_client.get_customer_codes.return_value = {"data": [], "status": [] }
         main.handler(event, {})
         mock_redis_client.get_customer_codes.assert_called_with(['m2-barcode-store-by-barcode-33433101372807', 'm2-barcode-store-by-barcode-33433132050471', 'm2-barcode-store-by-barcode-33433131096251'])

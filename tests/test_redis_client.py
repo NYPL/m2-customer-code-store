@@ -37,7 +37,7 @@ class TestRedisClient:
                                 { "barcode": "789", "m2CustomerCode": 'ef'}]
     
     def test_get_customer_code_no_response(self, test_redis_client):
-        barcodes = ['123', '456', '789']
+        barcodes = ['m2-barcode-store-by-barcode-123', 'm2-barcode-store-by-barcode-456', 'm2-barcode-store-by-barcode-789']
         test_redis_client.client.mget.return_value = [None,None,None]
         resp = test_redis_client.get_customer_codes(barcodes)
         assert resp['status'] == 400

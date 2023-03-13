@@ -23,6 +23,8 @@ class RedisClient:
     def get_size(self):
         return self.client.dbsize()
     
+    def _remove_prefix(self, barcode):
+        return barcode.replace("m2-barcode-store-by-barcode-", "")
 # Expects a list of strings that look like this: m2-barcode-store-by-barcode-{barcode}
     def get_customer_codes(self, barcodes):
         resp = {}
@@ -36,12 +38,12 @@ class RedisClient:
             if barcodes == None or barcodes_length == 0:
                 resp['message'] = 'No barcode supplied'
             else:
-                resp['message'] = 'Customer codes not found for barcodes: ' + ', '.join(barcodes) 
+                resp['message'] = 'Customer codes not found for barcodes: ' + ', '.join(map(self._remove_prefix, barcodes)) 
         else: 
             for i in range(barcodes_length):
                 if customer_codes[i] != None:
                     barcodes_with_customer_codes.append({
-                        "barcode": barcodes[i].replace("m2-barcode-store-by-barcode-", ""), 
+                        "barcode": self._remove_prefix(barcodes[i]), 
                         "m2CustomerCode":customer_codes[i]})
                 else:
                     failed_barcodes.append(barcodes[i])
