@@ -1,6 +1,6 @@
 import pytest
-import os
 import main
+import os
 
 class TestLambdaFunction:
     @pytest.fixture
@@ -10,15 +10,17 @@ class TestLambdaFunction:
         return client
     @pytest.fixture
     def mock_py_utils(self, mocker):
-        utils = mocker.MagicMock()
-        mocker.patch('main.nypl_py_utils.functions.config_helper', return_value = utils)
-        return utils
-    def test_lambda_handler_string_parse(self, mock_redis_client, mocker):
+        mock_load_env_file = mocker.MagicMock()
+        mocker.patch('main.load_env_file', return_value = mock_load_env_file)
+        return mock_load_env_file
+    def test_lambda_handler_string_parse(self, mock_redis_client, mock_py_utils, mocker):
+        os.environ['REDIS_ENDPOINT'] = 'abc'
         event = {
                     "queryStringParameters": {
                         "barcodes": "33433101372807,33433132050471,33433131096251"
                     }
                 }
+        mock_py_utils.create_logger
         mock_redis_client.get_customer_codes.return_value = {"data": [], "status": [] }
         main.handler(event, {})
         mock_redis_client.get_customer_codes.assert_called_with(['m2-barcode-store-by-barcode-33433101372807', 'm2-barcode-store-by-barcode-33433132050471', 'm2-barcode-store-by-barcode-33433131096251'])
