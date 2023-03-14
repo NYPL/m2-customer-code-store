@@ -11,7 +11,6 @@ logger = create_log('lambda_function')
 
 def handler(event, context):
     logger.info('Connecting to redis')
-    print(event)
     if 'docs' in event['path']:
         with open('swagger.json', 'r') as json_content:
             return json_content.read()
