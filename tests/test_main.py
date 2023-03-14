@@ -15,7 +15,7 @@ class TestLambdaFunction:
         return mock_load_env_file
     def test_lambda_handler_string_parse(self, mock_redis_client, mock_py_utils, mocker):
         os.environ['REDIS_ENDPOINT'] = 'abc'
-        event = {
+        event = {   "path": "api/v0.1/m2-customer-code-store",
                     "queryStringParameters": {
                         "barcodes": "33433101372807,33433132050471,33433131096251"
                     }
@@ -24,3 +24,7 @@ class TestLambdaFunction:
         main.handler(event, {})
         mock_redis_client.get_customer_codes.assert_called_with(['m2-barcode-store-by-barcode-33433101372807', 'm2-barcode-store-by-barcode-33433132050471', 'm2-barcode-store-by-barcode-33433131096251'])
     
+    def test_docs_endpoint(self, mock_redis_client, mock_py_utils, mocker):
+        json = main.handler({"path": "api/v0.1/docs"}, {})
+        assert 'swagger' in json
+        assert 'basePath' in json
