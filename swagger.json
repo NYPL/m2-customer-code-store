@@ -1,0 +1,92 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "0.1",
+    "title": "M2 Customer Code By Barcode API",
+    "description": "returns M2 Customer Codes for given item barcodes"
+  },
+  "basePath": "/api",
+  "schemes": [
+    "https"
+  ],
+  "tags": [
+    {
+      "name": "m2",
+      "description": "M2 customer code API"
+    }
+  ],
+  "definitions": {
+    "M2CustomerCodeByBarcodeResponseSuccess": {
+      "description": "Successful operation",
+      "properties": {
+         "data": {
+          "type": "array",
+          "example": [
+            {
+              "barcode": "33433122885894",
+              "m2CustomerCode": "JS"
+            },
+            [
+              {
+                "barcode": "33433122885895",
+                "m2CustomerCode": "JK"
+              }
+            ]
+          ]
+         }
+      }},
+    "M2CustomerCodeByBarcodeResponseFailure": {
+      "description": "Failure due to no barcodes or all unmatched barcodes provided",
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "Customer codes not found for barcodes: 334"
+        }
+      }
+    }
+  },
+  "paths": {
+    "/v0.1/m2-customer-codes": {
+      "get": {
+        "tags": [
+          "m2"
+        ],
+        "summary": "Get m2 customer codes by item barcode",
+        "description": "Get m2 customer codes by item barcode",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "barcodes",
+            "in": "query",
+            "description": "comma delineated list of barcodes",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/M2CustomerCodeByBarcodeResponseSuccess"
+            }
+          },
+          "400": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/M2CustomerCodeByBarcodeResponseFailure"
+            }
+          }
+        },
+        "security": [
+          {
+            "api_auth": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
