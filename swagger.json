@@ -46,7 +46,7 @@
     }
   },
   "paths": {
-    "api/v0.1/m2-customer-codes": {
+    "/v0.1/m2-customer-codes": {
       "get": {
         "tags": [
           "m2"
