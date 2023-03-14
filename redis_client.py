@@ -23,6 +23,8 @@ class RedisClient:
     def get_size(self):
         return self.client.dbsize()
     
+    def _remove_prefix(self, barcode):
+        return barcode.replace("m2-barcode-store-by-barcode-", "")
 # Expects a list of strings that look like this: m2-barcode-store-by-barcode-{barcode}
     def get_customer_codes(self, barcodes):
         resp = {}
@@ -30,17 +32,18 @@ class RedisClient:
         customer_codes = self.client.mget(barcodes)
         failed_barcodes = []
         barcodes_length = len(barcodes) if barcodes != None else 0
-        if customer_codes == None or barcodes_length == 0:
+        no_customer_codes = all(code == None for code in customer_codes)
+        if no_customer_codes or barcodes_length == 0:
             resp['status'] = 400 
             if barcodes == None or barcodes_length == 0:
                 resp['message'] = 'No barcode supplied'
             else:
-                resp['message'] = 'Customer codes not found for barcodes: ' + ', '.join(barcodes) 
+                resp['message'] = 'Customer codes not found for barcodes: ' + ', '.join(map(self._remove_prefix, barcodes)) 
         else: 
             for i in range(barcodes_length):
                 if customer_codes[i] != None:
                     barcodes_with_customer_codes.append({
-                        "barcode": barcodes[i].replace("m2-barcode-store-by-barcode-", ""), 
+                        "barcode": self._remove_prefix(barcodes[i]), 
                         "m2CustomerCode":customer_codes[i]})
                 else:
                     failed_barcodes.append(barcodes[i])
@@ -61,8 +64,3 @@ class RedisClient:
 class RedisClientError(Exception):
     def __init__(self, message = None):
         self.message = message
-
-# r = RedisClient('rescat-romcom-redis-qa.frh6pg.0001.use1.cache.amazonaws.com')
-# print(r.get_customer_codes(["m2-barcode-store-by-barcode-33433101372807",
-#                             'yo mama',
-#     "m2-barcode-store-by-barcode-33433132050471",]))
