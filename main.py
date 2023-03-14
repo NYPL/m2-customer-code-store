@@ -8,12 +8,11 @@ import json
 
 logger = create_log('lambda_function')
 
-
 def handler(event, context):
     logger.info('Connecting to redis')
     if 'docs' in event['path']:
         with open('swagger.json', 'r') as swagger_doc:
-            response = swagger_doc.read()
+            response = json.loads(swagger_doc.read())
             status = 200
     else:
         try:
@@ -35,4 +34,4 @@ def handler(event, context):
                 "headers": {
                 "Content-type": "application/json"
                 }
-        }
+            }
