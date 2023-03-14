@@ -12,8 +12,9 @@ logger = create_log('lambda_function')
 def handler(event, context):
     logger.info('Connecting to redis')
     if 'docs' in event['path']:
-        with open('swagger.json', 'r') as json_content:
-            return json_content.read()
+        with open('swagger.json', 'r') as swagger_doc:
+            response = swagger_doc.read()
+            status = 200
     else:
         try:
             load_env_file(os.environ['ENVIRONMENT'], 'config/{}.yaml')
@@ -25,12 +26,14 @@ def handler(event, context):
             barcodes = event['queryStringParameters']['barcodes'].split(',')
             barcodes_with_prefix = ['m2-barcode-store-by-barcode-' + barcode for barcode in barcodes]
             response = redis_client.get_customer_codes(barcodes_with_prefix)
-            return {
-                    "statusCode": response['status'],
-                    "body": json.dumps(response),
-                    "headers": {
-                    "Content-type": "application/json"
-                    }
-            }
+            status = response['status']
         except Exception as e:
             logger.error('error getting barcodes :{}'.format(e))
+    return {
+                "statusCode": status,
+                "body": json.dumps(response),
+                "headers": {
+                "Content-type": "application/json"
+                }
+        }
+        

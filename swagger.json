@@ -7,7 +7,7 @@
   },
   "basePath": "/api",
   "schemes": [
-    "http"
+    "https"
   ],
   "tags": [
     {
@@ -46,7 +46,7 @@
     }
   },
   "paths": {
-    "/v0.1/m2-customer-code-store": {
+    "api/v0.1/m2-customer-codes": {
       "get": {
         "tags": [
           "m2"
