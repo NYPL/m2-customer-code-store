@@ -21,10 +21,10 @@ Successful response:
 "statusCode": 200,
 "body": {
   "status": 200,
-  “data”: [
+  "data": [
     {
-    “barcode”: “1234”,
-    “m2CustomerCode”: “NX”
+    "barcode": "1234",
+    "m2CustomerCode": "NX"
     }
   ]
 }}
