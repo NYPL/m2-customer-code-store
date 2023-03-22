@@ -1,6 +1,7 @@
 import pytest
 import main
 import os
+import json
 
 class TestLambdaFunction:
     @pytest.fixture
@@ -25,6 +26,7 @@ class TestLambdaFunction:
         mock_redis_client.get_customer_codes.assert_called_with(['m2-barcode-store-by-barcode-33433101372807', 'm2-barcode-store-by-barcode-33433132050471', 'm2-barcode-store-by-barcode-33433131096251'])
     
     def test_docs_endpoint(self, mock_redis_client, mock_py_utils, mocker):
-        swagger_doc = main.handler({"path": "api/v0.1/docs"}, {})
-        assert '#/definitions/M2CustomerCodeByBarcodeResponseFailure', 'swagger' in swagger_doc['body']
+        resp = main.handler({"path": "api/v0.1/docs"}, {})
+        swagger_doc = json.loads(resp['body'])
+        assert swagger_doc['swagger'] == '2.0'
         

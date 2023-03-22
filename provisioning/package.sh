@@ -10,6 +10,7 @@ pip install \
 
 # Move required application files into build:
 cp *.py build/.
+cp swagger.json build/.
 cp -R config build/.
 
 cd build/
