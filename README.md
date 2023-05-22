@@ -21,10 +21,10 @@ Successful response:
 "statusCode": 200,
 "body": {
   "status": 200,
-  “data”: [
+  "data": [
     {
-    “barcode”: “1234”,
-    “m2CustomerCode”: “NX”
+    "barcode": "1234",
+    "m2CustomerCode": "NX"
     }
   ]
 }}
@@ -61,7 +61,7 @@ Delete date
 
 ## Upload script
 
-`python write_csv_to_redis {csvfilename} {batchsize}`
+`python write_csv_to_redis.py {csvfilename} {batchsize}`
 Batch size defaults to 100. The initial load of >2,000,000 records, using a batch size of 10,000, took around 30 seconds.
 
 ## Troubleshooting
