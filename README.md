@@ -1,4 +1,4 @@
-### M2 Customer Code Store
+# M2 Customer Code Store
 
 This app contains:
 
@@ -18,55 +18,71 @@ Successful response:
 
 ```json
 {
-"statusCode": 200,
-"body": {
-  "status": 200,
-  "data": [
-    {
-    "barcode": "1234",
-    "m2CustomerCode": "NX"
-    }
-  ]
-}}
+  "statusCode": 200,
+  "body": {
+    "status": 200,
+    "data": [
+      {
+        "barcode": "1234",
+        "m2CustomerCode": "NX"
+      }
+    ]
+  }
+}
 ```
 
 Failure response (returned with no response from elasticache):
 ```json
 {
 "statusCode": 400,
-"body": {
-"status": 400,
-"message": "Failure message"
-}
+  "body": {
+    "status": 400,
+    "message": "Failure message"
+  }
 }
 ```
+
 ## Loading data to the store
 
-### Creating CSV to upload
+Periodically, we need to generate a CSV of recent M2 accessions and load them into the QA and Prod Redis stores.
 
-This script expects a csv generated following the procedure discussed here:
+### Creating CSV to load
 
-The “Barcodes by CUS/DATE” report is the best way to extract customer codes and barcodes from LAS. This is the report we should use to populate the M2 Customer Code Store.
+Consult the [TAD for fuller instructions with sensitive information included](https://docs.google.com/document/d/1Tl7TLIxE6uS5fPV-955F90TivfzINegCX8vmamEgkAw/edit?pli=1#heading=h.sv5u9sslauox). The basic procedure is:
 
-From Phill Mui:
-For the complete list of all the item barcodes and customer codes, I would suggest to try Reports --> Export Item Barcodes --> Export Item Barcodes --> Export Barcodes by CUS/DATE
+ - Connect to VPN
+ - Connect to LAS server
+ - Load LAS client (`TERM=xterm /las/prod/scripts/lasuser`)
+ - Navigate to “Barcodes by CUS/DATE” report via 3 REPORTS > 8 EXPORT ITEM BARCODES > 12 EXPORT ITEM BARCoDES
+ - Select "By Customer", CUS: \*, and relevant "Beg Date" and "End Date" range
+ - Note the exported file path
+ - Log out and SCP the report to your local machine.
 
-For that report, you should be able to gather the entire list of item barcodes according to which customer codes they belong to. If you do not want to work with files that are too massive though, I would suggest to run yearly report instead. As for incremental updates as my team accession more materials, we should definitely have a conversation about that to see if I can assist you with that considering I mainly deal with newly accessioned materials every night.
+That should produce a file with barcodes and customer codes for items in M2, including columns:
+- Item barcode
+- Accession date
+- Customer code
+- Delete date
 
-That should produce a file with the complete set of barcodes and customer codes for items in M2, including columns:
-Item barcode
-Accession date
-Customer code
-Delete date
+### Update store from CSV
 
-## Upload script
+`ENVIRONMENT=(qa|production) python write_csv_to_redis.py {csvfilename}`
 
-`python write_csv_to_redis.py {csvfilename} {batchsize}`
-Batch size defaults to 100. The initial load of >2,000,000 records, using a batch size of 10,000, took around 30 seconds.
+Batch size defaults to 1000. The initial load of >2,000,000 records, using a batch size of 10,000, took around 30 seconds.
+
+For all the options, run:
+
+`python write_csv_to_redis.py -h`
+
+Note that access to the shared prod Redis appears restricted to SASB internal network at writing.
 
 ## Troubleshooting
+
 Troubleshooting psycopg "ImportError: no pq wrapper available."
+
 In OSX, if you have a /usr/local/opt/libpq/lib and xcode installed, but get above error when running the app locally, you may need to install the psycopg this way:
 
+```
 pip uninstall psycopg
 pip install "psycopg[c]"
+``
