@@ -8,30 +8,35 @@ import json
 
 logger = create_log('lambda_function')
 
+
 def handler(event, context):
-    logger.info('Connecting to redis')
     if 'docs' in event['path']:
         with open('swagger.json', 'r') as swagger_doc:
             response = json.loads(swagger_doc.read())
             status = 200
     else:
         try:
-            load_env_file(os.environ['ENVIRONMENT'], 'config/{}.yaml')
+            load_env_file(os.environ.get('ENVIRONMENT', 'qa'), 'config/{}.yaml')
+            logger = create_log('lambda_function')
             endpoint = os.environ['REDIS_ENDPOINT']
             redis_client = RedisClient(endpoint)
         except RedisClientError as e:
             logger.error('error connecting to redis: {}'.format(e))
         try:
+            logger.debug('Handling event: {}'.format(event))
+
             barcodes = event['queryStringParameters']['barcodes'].split(',')
             barcodes_with_prefix = ['m2-barcode-store-by-barcode-' + barcode for barcode in barcodes]
+            logger.debug('Querying {}'.format(barcodes_with_prefix))
+
             response = redis_client.get_customer_codes(barcodes_with_prefix)
             status = response['status']
         except Exception as e:
             logger.error('error getting barcodes :{}'.format(e))
     return {
-                "statusCode": status,
-                "body": json.dumps(response),
-                "headers": {
-                "Content-type": "application/json"
-                }
-            }
+          "statusCode": status,
+          "body": json.dumps(response),
+          "headers": {
+            "Content-type": "application/json"
+          }
+      }
