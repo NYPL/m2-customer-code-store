@@ -1,6 +1,6 @@
 {
   "path": "/api/v0.1/m2-customer-codes",
   "queryStringParameters": {
-    "barcode": "33433132054325"
+    "barcodes": "33433132054325"
   }
 }

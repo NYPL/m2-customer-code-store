@@ -13,22 +13,30 @@ class ParameterError(Exception):
         self.message = message
 
 
-def handler(event, context):
-    # Establish defaults in case of error:
-    status = 500
-    response = {}
+def error_response(status, message):
+    return {
+        "statusCode": status,
+        "body": json.dumps({'error': message}),
+        "headers": {
+          "Content-type": "application/json"
+        }
+    }
 
+
+def handler(event, context):
+    status = 200
     if 'docs' in event['path']:
         with open('swagger.json', 'r') as swagger_doc:
             response = json.loads(swagger_doc.read())
-            status = 200
     else:
         try:
             load_env_file(os.environ.get('ENVIRONMENT', 'qa'), 'config/{}.yaml')
             endpoint = os.environ['REDIS_ENDPOINT']
             redis_client = RedisClient(endpoint)
-        except RedisClientError as e:
-            logger.error('error connecting to redis: {}'.format(e))
+        except Exception as e:
+            error_message = 'Error connecting to redis: {}'.format(e)
+            logger.error(error_message)
+            return error_response(500, 'Error connecting to redis')
 
         try:
             logger.debug('Handling event: {}'.format(event))
@@ -45,14 +53,11 @@ def handler(event, context):
             status = response['status']
         except ParameterError as e:
             logger.error('Parameter error: {}'.format(e))
-            status = 400
-            response = {
-                "status": 200,
-                "error": e.message
-            }
+            return error_response(400, e.message)
 
         except Exception as e:
-            logger.error('Error getting barcodes: {}'.format(e))
+            error_message = 'Error getting barcodes: {}'.format(e)
+            return error_response(500, 'Error getting barcodes')
     return {
           "statusCode": status,
           "body": json.dumps(response),
