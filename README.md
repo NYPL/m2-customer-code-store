@@ -6,20 +6,6 @@ This app contains:
 2. Lightweight API for getting customer codes
 3. A script for uploading customer codes to the Redis Elasticache
 
-## Running locally
-
-Set up:
-
-```
-./provisioning/package.sh
-```
-
-Invoke on arbitrary event:
-
-```
-sam local invoke --profile nypl-digital-dev -t sam.local.yml -e event.json
-```
-
 ## API
 
 The interface for this API looks like this:
@@ -55,6 +41,24 @@ Failure response (returned with no response from elasticache):
   }
 }
 ```
+
+## Running locally
+
+Set up:
+
+```
+./provisioning/package.sh
+```
+
+Invoke on arbitrary event:
+
+```
+sam local invoke --profile nypl-digital-dev -t sam.local.yml -e event.json
+```
+
+## Testing
+
+`make test`
 
 ## Loading data to the store
 
