@@ -17,7 +17,8 @@ class TestLambdaFunction:
         mocker.patch('main.load_env_file', return_value=mock_load_env_file)
         return mock_load_env_file
 
-    def test_lambda_handler_required_params(self, mock_redis_client):
+    def test_lambda_handler_required_params(self, mock_redis_client, mock_py_utils):
+        os.environ['REDIS_ENDPOINT'] = 'abc'
         resp = main.handler({"path": "/api/v0.1/m2-customer-codes"}, {})
         assert json.loads(resp['body'])['error'] == 'Missing queryStringParameters'
         resp = main.handler({"path": "/api/v0.1/m2-customer-codes", "queryStringParameters": {}}, {})
