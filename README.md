@@ -42,6 +42,38 @@ Failure response (returned with no response from elasticache):
 }
 ```
 
+## Running locally
+
+```
+python handle-local-event.py ./event.json
+```
+
+Or, to run against production config (note that the production Redis is only available to the SASB internal network at writing):
+
+```
+ENVIRONMENT=production python handle-local-event.py ./event.json
+```
+
+### Using sam (for best emulation)
+
+Use `sam` to run the code in a container that best emulates the deployment environment.
+
+Set up:
+
+```
+./provisioning/package.sh
+```
+
+Invoke on arbitrary event:
+
+```
+sam local invoke --profile nypl-digital-dev -t sam.local.yml -e event.json
+```
+
+## Testing
+
+`make test`
+
 ## Loading data to the store
 
 Periodically, we need to generate a CSV of recent M2 accessions and load them into the QA and Prod Redis stores.
