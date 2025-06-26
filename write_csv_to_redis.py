@@ -1,6 +1,8 @@
 import argparse
 import csv
 import os
+import sys
+from redis.exceptions import TimeoutError
 from redis_client import RedisClient
 
 from nypl_py_utils.functions.config_helper import load_env_file, ConfigHelperError
@@ -34,7 +36,15 @@ class CsvWriter:
         print(f'Loading {self.input_path} with batch-size {self.batch_size}, writing to {endpoint}')
         if args.dryrun:
             print('Operating in dry-run mode')
-        self.redis = RedisClient(endpoint)
+
+        try:
+            self.redis = RedisClient(endpoint)
+        except TimeoutError as e:
+            print(f'Timed out connecting to redis: {e}')
+            if os.environ.get('ENVIRONMENT') == 'production':
+                print('Note that one must use a wired connection at SASB, off VPN, to connect to production Redis')
+            sys.exit()
+
         self.pipe = self.redis.pipeline()
         self.csv_length = self._get_csv_length()
 

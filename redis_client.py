@@ -10,11 +10,13 @@ class RedisClient:
 
     def _connect(self):
         try:
-            client = StrictRedis(host=self.host, decode_responses=True)
+            client = StrictRedis(host=self.host, decode_responses=True, socket_connect_timeout=10)
             client.ping()
         except ConnectionError as e:
             self.logger.error('Error connecting to redis at endpoint: ' + self.host)
-            raise RedisClientError(f'Connected to redis at: {self.host}'.format(e))
+
+            raise RedisClientError(f'Error connecting to redis at: {self.host}'.format(e))
+
         self.logger.info('Connected to redis at:' + self.host)
         return client
 
