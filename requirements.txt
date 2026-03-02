@@ -18,7 +18,7 @@ jmespath==1.0.1
 lxml==4.9.2
 MarkupSafe==2.1.2
 mysql-connector-python==8.0.32
-nypl_py_utils==0.0.5
+nypl_py_utils[log-helper,config-helper]==1.8.0
 packaging==23.0
 pluggy==1.0.0
 protobuf==3.20.3

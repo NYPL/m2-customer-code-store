@@ -44,6 +44,18 @@ Failure response (returned with no response from elasticache):
 
 ## Running locally
 
+To install:
+
+```
+pyenv local 3.10
+python3 -m venv localenv
+source localenv/bin/activate
+python -m pip install --upgrade pip
+python3 -m pip install -r requirements.txt
+```
+
+To process API Gateway event:
+
 ```
 python handle-local-event.py ./event.json
 ```

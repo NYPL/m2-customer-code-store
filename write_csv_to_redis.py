@@ -56,7 +56,7 @@ class CsvWriter:
         with open(self.input_path, newline='') as in_file:
             csv_rows = self._csv_enumerator(in_file)
             for i, [barcode, date, customer_code, deleted] in csv_rows:
-                key = 'm2-barcode-store-by-barcode-' + barcode
+                key = RedisClient.KEY_PREFIX + barcode
 
                 # In dry-run mode, just print summary of writes:
                 if args.dryrun:
