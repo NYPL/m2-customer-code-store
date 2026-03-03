@@ -5,7 +5,7 @@ from nypl_py_utils.functions.config_helper import load_env_file
 
 from redis_client import RedisClient, RedisClientError
 
-logger = create_log('lambda_function', json=True)
+logger = create_log("lambda_function", json=True)
 
 
 class ParameterError(Exception):
@@ -22,63 +22,57 @@ class Main:
 
     def __init__(self):
         try:
-            load_env_file(os.environ.get('ENVIRONMENT', 'qa'), 'config/{}.yaml')
-            self.logger = create_log('lambda_function')
-            endpoint = os.environ['REDIS_ENDPOINT']
+            load_env_file(os.environ.get("ENVIRONMENT", "qa"), "config/{}.yaml")
+            self.logger = create_log("lambda_function")
+            endpoint = os.environ["REDIS_ENDPOINT"]
             self.redis_client = RedisClient(endpoint)
         except Exception as e:
-            error_message = 'Error connecting to redis: {}'.format(e)
+            error_message = "Error connecting to redis: {}".format(e)
             self.logger.error(error_message)
 
-        self.logger = create_log('lambda_function')
+        self.logger = create_log("lambda_function")
 
     def handle(self, event):
-        if 'docs' in event['path']:
-            with open('swagger.json', 'r') as swagger_doc:
+        if "docs" in event["path"]:
+            with open("swagger.json", "r") as swagger_doc:
                 response = json.loads(swagger_doc.read())
         else:
             try:
-                self.logger.debug('Handling event: {}'.format(event))
-                if event.get('queryStringParameters', None) is None:
-                    raise ParameterError('Missing queryStringParameters')
-                if event['queryStringParameters'].get('barcodes', None) is None:
-                    raise ParameterError('Missing barcodes parameter')
+                self.logger.debug("Handling event: {}".format(event))
+                if event.get("queryStringParameters", None) is None:
+                    raise ParameterError("Missing queryStringParameters")
+                if event["queryStringParameters"].get("barcodes", None) is None:
+                    raise ParameterError("Missing barcodes parameter")
 
-                barcodes = event['queryStringParameters']['barcodes'].split(',')
+                barcodes = event["queryStringParameters"]["barcodes"].split(",")
 
                 response = self.redis_client.get_customer_codes(barcodes)
             except ParameterError as e:
-                self.logger.error('Parameter error: {}'.format(e))
+                self.logger.error("Parameter error: {}".format(e))
                 return self.error_response(400, e.message)
 
             except RedisClientError as e:
                 # In this context, the only RedisClientErrors that may be raised are user error
-                self.logger.error('RedisClient error: {}'.format(e))
+                self.logger.error("RedisClient error: {}".format(e))
                 return self.error_response(400, e.message)
 
             except Exception as e:
-                error_message = 'Error getting barcodes: {}'.format(e)
+                error_message = "Error getting barcodes: {}".format(e)
                 return self.error_response(500, error_message)
         return {
-              "statusCode": 200,
-              "body": json.dumps(response),
-              "headers": {
-                "Content-type": "application/json"
-              }
-          }
+            "statusCode": 200,
+            "body": json.dumps(response),
+            "headers": {"Content-type": "application/json"},
+        }
 
     def error_response(self, status, message):
         return {
             "statusCode": status,
-            "body": json.dumps({'error': message}),
-            "headers": {
-              "Content-type": "application/json"
-            }
+            "body": json.dumps({"error": message}),
+            "headers": {"Content-type": "application/json"},
         }
 
-
-    def instance(reset = False):
+    def instance(reset=False):
         if Main._instance is None or reset:
             Main._instance = Main()
         return Main._instance
-

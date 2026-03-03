@@ -4,11 +4,11 @@ from nypl_py_utils.functions.log_helper import create_log
 
 
 class RedisClient:
-    KEY_PREFIX = 'm2-barcode-store-by-barcode-'
+    KEY_PREFIX = "m2-barcode-store-by-barcode-"
 
     def __init__(self, endpoint):
         self.host = endpoint
-        self.logger = create_log('redis_client', json=True)
+        self.logger = create_log("redis_client", json=True)
         self.client = self._connect()
 
         self._last_n_lookups = []
@@ -18,9 +18,9 @@ class RedisClient:
             client = StrictRedis(host=self.host, decode_responses=True)
             client.ping()
         except ConnectionError as e:
-            self.logger.error('Error connecting to redis at endpoint: ' + self.host)
-            raise RedisClientError(f'Connected to redis at: {self.host}'.format(e))
-        self.logger.info('Connected to redis at:' + self.host)
+            self.logger.error("Error connecting to redis at endpoint: " + self.host)
+            raise RedisClientError(f"Connected to redis at: {self.host}".format(e))
+        self.logger.info("Connected to redis at:" + self.host)
         return client
 
     def pipeline(self):
@@ -39,23 +39,27 @@ class RedisClient:
         customer_codes = self.client.mget(barcodes_with_prefix)
 
         return [
-            { "barcode": barcodes[i], "m2CustomerCode": customer_codes[i] }
+            {"barcode": barcodes[i], "m2CustomerCode": customer_codes[i]}
             for i in range(barcodes_length)
         ]
 
     def get_customer_codes(self, barcodes):
         if barcodes is None or len(barcodes) == 0:
-            raise RedisClientError('No barcode supplied')
+            raise RedisClientError("No barcode supplied")
 
         pairs = self.barcodes_with_customer_codes(barcodes)
 
-        found = [pair for pair in pairs if pair['m2CustomerCode'] is not None]
+        found = [pair for pair in pairs if pair["m2CustomerCode"] is not None]
         if len(found) == 0:
-            raise RedisClientError(f'Customer codes not found for barcodes: {", ".join(barcodes)}')
+            raise RedisClientError(
+                f'Customer codes not found for barcodes: {", ".join(barcodes)}'
+            )
 
-        failed = [pair['barcode'] for pair in pairs if pair['m2CustomerCode'] is None]
+        failed = [pair["barcode"] for pair in pairs if pair["m2CustomerCode"] is None]
         if len(failed) > 0:
-            self.logger.debug('Barcodes {} returned no customer codes'.format(', '.join(failed)))
+            self.logger.debug(
+                "Barcodes {} returned no customer codes".format(", ".join(failed))
+            )
 
         self.monitor_failed_lookups(pairs)
 
@@ -71,36 +75,44 @@ class RedisClient:
 
         max_lookups = 100
         try:
-            max_lookups = int(os.environ.get('MONITOR_LOOKUPS_COUNT', '100'))
+            max_lookups = int(os.environ.get("MONITOR_LOOKUPS_COUNT", "100"))
         except:
-            self.logger.error(f"Failure to parse MONITOR_FAILURE_RATE: {os.environ['MONITOR_FAILURE_RATE']}")
+            self.logger.error(
+                f"Failure to parse MONITOR_FAILURE_RATE: {os.environ['MONITOR_FAILURE_RATE']}"
+            )
 
         self._last_n_lookups = pairs + self._last_n_lookups
 
-        if (len(self._last_n_lookups) > max_lookups):
+        if len(self._last_n_lookups) > max_lookups:
             self._last_n_lookups = self._last_n_lookups[0:max_lookups]
 
         monitor_failure_rate = 0.1
         try:
-            monitor_failure_rate = float(os.environ.get('MONITOR_FAILURE_RATE', '0.10'))
-        except: 
-            self.logger.error(f"Failure to parse MONITOR_FAILURE_RATE: {os.environ['MONITOR_FAILURE_RATE']}")
+            monitor_failure_rate = float(os.environ.get("MONITOR_FAILURE_RATE", "0.10"))
+        except:
+            self.logger.error(
+                f"Failure to parse MONITOR_FAILURE_RATE: {os.environ['MONITOR_FAILURE_RATE']}"
+            )
 
-        failed = len([pair for pair in self._last_n_lookups if pair['m2CustomerCode'] is None])
+        failed = len(
+            [pair for pair in self._last_n_lookups if pair["m2CustomerCode"] is None]
+        )
         requested = len(self._last_n_lookups)
         failure_rate = failed / requested
 
         # If we've collected enough samples and failure rate exceeds threshold, log error:
         sufficient_data = requested >= min(max_lookups, 10)
         if sufficient_data and failure_rate > monitor_failure_rate:
-            self.logger.error(f'Lookup failure rate is {"{:2.1f}".format(failure_rate * 100)}%')
+            self.logger.error(
+                f'Lookup failure rate is {"{:2.1f}".format(failure_rate * 100)}%'
+            )
 
-    def _danger_delete(self, *, pattern='', key=''):
+    def _danger_delete(self, *, pattern="", key=""):
         if len(pattern) > 0:
             for key in self.client.scan_iter(pattern):
                 self.client.delete(key)
         if len(key) > 0:
-            self.client.delete('key')
+            self.client.delete("key")
 
 
 class RedisClientError(Exception):
