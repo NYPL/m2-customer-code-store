@@ -33,7 +33,6 @@ class Main:
         self.logger = create_log('lambda_function')
 
     def handle(self, event):
-        status = 200
         if 'docs' in event['path']:
             with open('swagger.json', 'r') as swagger_doc:
                 response = json.loads(swagger_doc.read())
@@ -53,6 +52,7 @@ class Main:
                 return self.error_response(400, e.message)
 
             except RedisClientError as e:
+                # In this context, the only RedisClientErrors that may be raised are user error
                 self.logger.error('RedisClient error: {}'.format(e))
                 return self.error_response(400, e.message)
 
@@ -60,7 +60,7 @@ class Main:
                 error_message = 'Error getting barcodes: {}'.format(e)
                 return self.error_response(500, error_message)
         return {
-              "statusCode": status,
+              "statusCode": 200,
               "body": json.dumps(response),
               "headers": {
                 "Content-type": "application/json"
