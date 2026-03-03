@@ -71,7 +71,7 @@ class TestRedisClient:
                 {"barcode": "987", "m2CustomerCode": None},
             ]
         )
-        test_redis_client.logger.assert_not_called()
+        test_redis_client.logger.error.assert_not_called()
 
         # Simulate one additional failed lookup:
         test_redis_client.monitor_failed_lookups(

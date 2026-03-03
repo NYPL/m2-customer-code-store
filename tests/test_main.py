@@ -2,7 +2,6 @@ import pytest
 import main
 import os
 import json
-import importlib
 
 
 class TestLambdaFunction:
