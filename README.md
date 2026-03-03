@@ -47,11 +47,12 @@ Failure response (returned with no response from elasticache):
 To install:
 
 ```
-pyenv local 3.10
+pyenv local 3.12
 python3 -m venv localenv
 source localenv/bin/activate
 python -m pip install --upgrade pip
 python3 -m pip install -r requirements.txt
+python3 -m pip install -r dev-requirements.txt
 ```
 
 To process API Gateway event:
