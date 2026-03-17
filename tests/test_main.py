@@ -42,7 +42,6 @@ class TestLambdaFunction:
                 "barcodes": "33433101372807,33433132050471,33433131096251"
             },
         }
-        print("here::")
         mock_redis_client.get_customer_codes.return_value = []
         main.handler(event, {})
         mock_redis_client.get_customer_codes.assert_called_with(
