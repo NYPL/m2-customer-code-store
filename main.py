@@ -5,8 +5,6 @@ from nypl_py_utils.functions.config_helper import load_env_file
 
 from redis_client import RedisClient, RedisClientError
 
-logger = create_log("lambda_function", json=True)
-
 
 class ParameterError(Exception):
     def __init__(self, message=None):
@@ -19,20 +17,21 @@ def handler(event, context):
 
 class Main:
     _instance = None
+    logger = None
 
     def __init__(self):
+        self.logger = create_log("main", json=True)
+
         try:
             load_env_file(os.environ.get("ENVIRONMENT", "qa"), "config/{}.yaml")
-            self.logger = create_log("lambda_function")
             endpoint = os.environ["REDIS_ENDPOINT"]
             self.redis_client = RedisClient(endpoint)
         except Exception as e:
             error_message = "Error connecting to redis: {}".format(e)
             self.logger.error(error_message)
 
-        self.logger = create_log("lambda_function")
-
     def handle(self, event):
+        self.logger.debug('Registering that I have been called')
         if "docs" in event["path"]:
             with open("swagger.json", "r") as swagger_doc:
                 response = json.loads(swagger_doc.read())
@@ -48,15 +47,16 @@ class Main:
 
                 response = self.redis_client.get_customer_codes(barcodes)
             except ParameterError as e:
-                self.logger.error("Parameter error: {}".format(e))
+                self.logger.info("Parameter error: {}".format(e))
                 return self.error_response(400, e.message)
 
             except RedisClientError as e:
                 # In this context, the only RedisClientErrors that may be raised are user error
-                self.logger.error("RedisClient error: {}".format(e))
+                self.logger.info("RedisClient error: {}".format(e))
                 return self.error_response(400, e.message)
 
             except Exception as e:
+                self.logger.error("Unknown error: {}".format(e))
                 error_message = "Error getting barcodes: {}".format(e)
                 return self.error_response(500, error_message)
         return {
