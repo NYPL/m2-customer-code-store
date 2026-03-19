@@ -44,7 +44,10 @@ class Main:
 
                 barcodes = event["queryStringParameters"]["barcodes"].split(",")
 
-                response = self.redis_client.get_customer_codes(barcodes)
+                response = {
+                    'data': self.redis_client.get_customer_codes(barcodes),
+                    'status': 200
+                }
             except ParameterError as e:
                 self.logger.info("Parameter error: {}".format(e))
                 return self.error_response(400, e.message)
