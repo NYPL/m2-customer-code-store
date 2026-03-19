@@ -31,7 +31,6 @@ class Main:
             self.logger.error(error_message)
 
     def handle(self, event):
-        self.logger.debug('Registering that I have been called')
         if "docs" in event["path"]:
             with open("swagger.json", "r") as swagger_doc:
                 response = json.loads(swagger_doc.read())
