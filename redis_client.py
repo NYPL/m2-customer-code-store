@@ -49,6 +49,8 @@ class RedisClient:
 
         pairs = self.barcodes_with_customer_codes(barcodes)
 
+        self.monitor_failed_lookups(pairs)
+
         found = [pair for pair in pairs if pair["m2CustomerCode"] is not None]
         if len(found) == 0:
             raise RedisClientError(
@@ -60,8 +62,6 @@ class RedisClient:
             self.logger.debug(
                 "Barcodes {} returned no customer codes".format(", ".join(failed))
             )
-
-        self.monitor_failed_lookups(pairs)
 
         return pairs
 
