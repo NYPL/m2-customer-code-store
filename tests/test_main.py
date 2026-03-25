@@ -1,7 +1,9 @@
 import pytest
-import main
 import os
 import json
+
+import main
+from redis_client import RedisClientError
 
 
 class TestLambdaFunction:
@@ -47,6 +49,28 @@ class TestLambdaFunction:
         mock_redis_client.get_customer_codes.assert_called_with(
             ["33433101372807", "33433132050471", "33433131096251"]
         )
+
+    def test_lambda_handler_error(
+        self, mock_redis_client, mock_py_utils, mocker
+    ):
+        # Reset singleton:
+        main.Main.instance(True)
+
+        os.environ["REDIS_ENDPOINT"] = "abc"
+        event = {
+            "path": "api/v0.1/m2-customer-code-store",
+            "queryStringParameters": {
+                "barcodes": "33433101372807"
+            },
+        }
+        mock_redis_client.get_customer_codes.side_effect = RedisClientError('oh no')
+        resp = main.handler(event, {})
+        mock_redis_client.get_customer_codes.assert_called_with(
+            ["33433101372807"]
+        )
+
+        assert json.loads(resp['body'])['status'] == 400
+        assert json.loads(resp['body'])['error'] == 'oh no'
 
     def test_docs_endpoint(self, mock_redis_client, mock_py_utils, mocker):
         resp = main.handler({"path": "api/v0.1/docs"}, {})
