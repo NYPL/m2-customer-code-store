@@ -70,7 +70,7 @@ class Main:
     def error_response(self, status, message):
         return {
             "statusCode": status,
-            "body": json.dumps({"error": message}),
+            "body": json.dumps({"error": message, "status": status}),
             "headers": {"Content-type": "application/json"},
         }
 
