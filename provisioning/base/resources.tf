@@ -69,7 +69,9 @@ resource "aws_lambda_function" "lambda_instance" {
 # Alarms
 
 locals {
-  log_metric_name = "M2CustomerCodeStoreError"
+  metric_base = "M2CustomerCodeStore"
+  log_metric_name = "${local.metric_base}LogError"
+  lambda_runtime_error_name = "${local.metric_base}LambdaError"
 }
 
 data "aws_sns_topic" "rc_alarms" {
@@ -107,7 +109,7 @@ resource "aws_cloudwatch_metric_alarm" "log_errors" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
-  alarm_name          = "${local.log_metric_name}Alarm-${var.environment}"
+  alarm_name          = "${local.lambda_runtime_error_name}Alarm-${var.environment}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "Errors"
