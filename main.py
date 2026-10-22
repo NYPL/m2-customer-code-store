@@ -4,6 +4,8 @@ from nypl_py_utils.functions.log_helper import create_log
 from nypl_py_utils.functions.config_helper import load_env_file
 
 from redis_client import RedisClient, RedisClientError
+from fetch_csv_reports import fetch_reports
+from ingest_csv_report import ingest_csv
 
 
 class ParameterError(Exception):
@@ -30,8 +32,19 @@ class Main:
             error_message = "Error connecting to redis: {}".format(e)
             self.logger.error(error_message)
 
+    def handle_ingest(self):
+        csv_paths = fetch_reports(days=7)
+        self.logger.info(f'Retreived csv paths: {csv_paths}')
+        for path in csv_paths:
+            added, csvcount, total = ingest_csv(path)
+            self.logger.info(f'From {path} ({csvcount} lines), added {added} entries, for a new total of {total} entries')
+        return True
+
     def handle(self, event):
-        if "docs" in event["path"]:
+        if event.get("type", None) == "scheduled-ingest":
+            # Specialty handler for ingest:
+            return self.handle_ingest()
+        elif "docs" in event.get("path", {}):
             with open("swagger.json", "r") as swagger_doc:
                 response = json.loads(swagger_doc.read())
         else:
