@@ -2,7 +2,7 @@
 Script for ingesting a report CSV (presumably an accessions report) from M2
 
 Usage:
-    python ingest-csv-report.py PATHTOCSV [--batchsize 1000]
+    python ingest_csv_report.py PATHTOCSV [--batchsize 1000]
 """
 import argparse
 import csv
@@ -82,6 +82,7 @@ def init():
 def ingest_csv(path, **kwargs):
     ingester = CsvIngester(path, batchsize=kwargs.get('batchsize', 1000))
 
+    # Capture starting and ending key counts
     starting_count = ingester.current_count()
     ingester.ingest(**kwargs)
     ending_count = ingester.current_count()
@@ -89,6 +90,7 @@ def ingest_csv(path, **kwargs):
     csv_length = ingester.csv_length
     added = ending_count - starting_count
 
+    # Return numbers representing additions & totals
     return (added, csv_length, ending_count)
 
 def parse_args():

@@ -2,7 +2,7 @@
 Script for fetching csv reports from an S3 bucket holding 2wks of M2 reports
 
 Usage:
-    python fetch-csv-reports.py [--type accessions] [--days 3]
+    python fetch_csv_reports.py [--type accessions] [--days 3]
 """
 from botocore.exceptions import ClientError
 import argparse
@@ -52,11 +52,13 @@ class S3Client:
 def fetch_reports(type='accessions', days=3):
     client = S3Client(boto3.client("s3"), bucket='m2-las-reports')
 
+    # The `type` argument will determine type of report to process. For now, we're just handling accessions:
     p = re.compile('\\d{4}-\\d{2}-\\d{2}-accessions.txt')
     key_matches = lambda f: p.fullmatch(f)
 
     files = client.list_contents(key_matches)
 
+    # Hard error of no matching reports found since that shouldn't ever happen:
     if len(files) == 0:
         raise Exception("Received no matching files from bucket")
 
