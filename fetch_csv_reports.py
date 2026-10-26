@@ -10,6 +10,11 @@ import boto3
 import re
 
 
+class FetchCsvReportsError(Exception):
+    def __init__(self, message=None):
+        self.message = message
+
+
 class S3Client:
     def __init__(self, s3_client, **kwargs):
         """
@@ -37,11 +42,8 @@ class S3Client:
             return files
         except ClientError as e:
             error_code = e.response["Error"]["Code"]
-            if error_code == "NoSuchBucket":
-                logger.info(f"Bucket {self.bucket_name} does not exist.")
-            else:
-                logger.error(f"Error listing bucket and objects: {error_code}")
-                raise
+            issue = f'Error listing bucket "{self.bucket_name}": {error_code}'
+            raise FetchCsvReportsError(issue)
 
     def download(self, key):
         path = f'/tmp/{key}'
@@ -60,7 +62,7 @@ def fetch_reports(type='accessions', days=3):
 
     # Hard error of no matching reports found since that shouldn't ever happen:
     if len(files) == 0:
-        raise Exception("Received no matching files from bucket")
+        raise FetchCsvReportsError("Received no matching files from bucket")
 
     download_paths = []
     for file in files[-days:]:
