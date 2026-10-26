@@ -11,6 +11,16 @@ terraform {
   }
 }
 
+locals {
+  metric_base = "M2CustomerCodeStore"
+  log_metric_name = "${local.metric_base}LogError"
+  lambda_runtime_error_name = "${local.metric_base}LambdaError"
+  tags = {
+    Project = "Research Catalog"
+    BusinessUnit = "LSP"
+  }
+}
+
 variable "environment" {
   type = string
   default = "qa"
@@ -34,6 +44,7 @@ resource "aws_s3_object" "uploaded_zip" {
   acl    = "private"
   source = "../../build/build.zip"
   etag = filemd5("../../build/build.zip")
+  tags = local.tags
 }
 
 # Create the lambda:
@@ -64,15 +75,29 @@ resource "aws_lambda_function" "lambda_instance" {
       ENVIRONMENT = var.environment
     }
   }
+
+  tags = local.tags
 }
+
+
+# Scheduled ingest daily at 1AM:
+
+resource "aws_cloudwatch_event_rule" "m2_customer_code_store_ingest" {
+  description         = "Schedule for ingesting M2 accession reports"
+  name                = "M2CustomerCodeStoreIngest-${var.environment}"
+  schedule_expression = "cron(0 05 ? * * *)"
+
+  tags = local.tags
+}
+
+resource "aws_cloudwatch_event_target" "m2_customer_code_store_ingest_target" {
+  rule                = aws_cloudwatch_event_rule.m2_customer_code_store_ingest.name
+  arn                 = aws_lambda_function.lambda_instance.arn
+  input               = jsonencode({ "type": "scheduled-ingest" })
+}
+
 
 # Alarms
-
-locals {
-  metric_base = "M2CustomerCodeStore"
-  log_metric_name = "${local.metric_base}LogError"
-  lambda_runtime_error_name = "${local.metric_base}LambdaError"
-}
 
 data "aws_sns_topic" "rc_alarms" {
   name = "research-catalog-team-alarms-${var.environment}"
@@ -106,6 +131,8 @@ resource "aws_cloudwatch_metric_alarm" "log_errors" {
   dimensions = {
     FunctionName = aws_lambda_function.lambda_instance.function_name
   }
+
+  tags = local.tags
 }
 
 resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
@@ -124,4 +151,6 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   dimensions = {
     FunctionName = aws_lambda_function.lambda_instance.function_name
   }
+
+  tags = local.tags
 }
