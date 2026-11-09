@@ -33,6 +33,12 @@ class Main:
             self.logger.error(error_message)
 
     def handle_ingest(self):
+        """
+        Handle 'scheduled-ingest' event (CW EventBridge event with custom payload)
+        Fetch latest M2 customer code reports from S3 and ingest them into Redis.
+        Redis/S3 connection errors that raise exceptions are intentionally
+        uncaught as they should should be retried and raise alarms
+        """
         csv_paths = fetch_reports(days=7)
         self.logger.info(f'Retreived csv paths: {csv_paths}')
         for path in csv_paths:
