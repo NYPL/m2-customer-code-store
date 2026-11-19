@@ -109,9 +109,7 @@ def parse_args():
         action="store_true",
         help="Enable dry-run mode (talk about things; don't do them",
     )
-    args = parser.parse_args()
-
-    return args
+    return parser.parse_args()
 
 
 if __name__ == "__main__":

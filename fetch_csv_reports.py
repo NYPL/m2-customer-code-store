@@ -90,7 +90,7 @@ def parse_args():
         default=3,
         help="Days of reports to retrieve"
     )
-    args = parser.parse_args()
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
