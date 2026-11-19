@@ -140,3 +140,4 @@ In OSX, if you have a /usr/local/opt/libpq/lib and xcode installed, but get abov
 pip uninstall psycopg
 pip install "psycopg[c]"
 ``
+
